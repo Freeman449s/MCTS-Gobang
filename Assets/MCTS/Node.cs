@@ -13,10 +13,10 @@ public class Node : MonoBehaviour {
     int nSimulationTimes = 0;
     int nWinTimes = 0;
     float UCB = 0;
-    LevelType type;
-    IMCTSGameState gameState; // 当前节点对应的游戏状态
+    readonly LevelType type; // readonly字段只能在声明时或构造函数内赋值
+    MCTSGameState gameState; // 当前节点对应的游戏状态
 
-    Node parent = null;
+    readonly Node parent = null;
     List<Node> children = new List<Node>();
 
     // Start is called before the first frame update
@@ -28,7 +28,7 @@ public class Node : MonoBehaviour {
     void Update() {
 
     }
-
+    
     public Node(LevelType type, Node parent) {
         this.type = type;
         this.parent = parent;
