@@ -6,10 +6,10 @@ namespace AStar
     /// <summary>
     /// AStar 中点的定义
     /// </summary>
-    public class Point
+    public class AStarPoint
     {
         // 父亲节点
-        public Point Parent { get; set; }
+        public AStarPoint Parent { get; set; }
 
         // F G H 值
         public float F { get; set; }
@@ -36,7 +36,7 @@ namespace AStar
         /// <param name="go"></param>
         /// <param name="parent"></param>
         /// <param name="position"></param>
-        public Point(int x, int y, GameObject go = null, Point parent = null, Vector3 position = default)
+        public AStarPoint(int x, int y, GameObject go = null, AStarPoint parent = null, Vector3 position = default)
         {
             this.X = x;
             this.Y = y;
@@ -51,7 +51,7 @@ namespace AStar
         /// </summary>
         /// <param name="parent"></param>
         /// <param name="g"></param>
-        public void UpdateParent(Point parent, float g)
+        public void UpdateParent(AStarPoint parent, float g)
         {
             this.Parent = parent;
             this.G = g;

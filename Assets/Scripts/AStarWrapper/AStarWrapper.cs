@@ -31,31 +31,31 @@ namespace AStar {
         /// <param name="mapWidth">地图宽</param>
         /// <param name="mapHeight">地图高</param>
         /// <returns>bool 找到路线/false 没有</returns>
-        public bool FindPath(Point start, Point end, Point[,] map, int mapWidth, int mapHeight)
+        public bool FindPath(AStarPoint start, AStarPoint end, AStarPoint[,] map, int mapWidth, int mapHeight)
         {
             // 开列表（周围的点列表），关列表（每次比较后得到的最小 F 的点列表）
-            List<Point> openList = new List<Point>();
-            List<Point> closeList = new List<Point>();
+            List<AStarPoint> openList = new List<AStarPoint>();
+            List<AStarPoint> closeList = new List<AStarPoint>();
 
             // 首先开始点添加进开列表
             openList.Add(start);
             while (openList.Count > 0)
             {
                 // 寻找开列表中最小的 F 值
-                Point point = FindMinFOfPoint(openList);
+                AStarPoint point = FindMinFOfPoint(openList);
                 
                 // 把得到的 F 最小的点移除 开列表，添加到关列表中
                 openList.Remove(point);
                 closeList.Add(point);
 
                 // 获取当前最小 F 点周围的点集合 
-                List<Point> surroundPoints = GetSurroundPoints(point, map, mapWidth, mapHeight);
+                List<AStarPoint> surroundPoints = GetSurroundPoints(point, map, mapWidth, mapHeight);
 
                 // 过滤掉关列表中的数据
                 PointFilter(surroundPoints, closeList);
 
                 // 遍历获得的周围点
-                foreach (Point item in surroundPoints)
+                foreach (AStarPoint item in surroundPoints)
                 {
                     // 已存在开列表中的话
                     if (openList.IndexOf(item) > -1)
@@ -98,10 +98,10 @@ namespace AStar {
         /// </summary>
         /// <param name="src">周围点集合</param>
         /// <param name="closeList">关列表</param>
-        private void PointFilter(List<Point> src, List<Point> closeList)
+        private void PointFilter(List<AStarPoint> src, List<AStarPoint> closeList)
         {
             // 遍历，存在则移除
-            foreach (Point item in closeList)
+            foreach (AStarPoint item in closeList)
             {
                 if (src.IndexOf(item) > -1)
                 {
@@ -119,11 +119,11 @@ namespace AStar {
         /// <param name="mapWidth">地图宽</param>
         /// <param name="mapHeight">地图高</param>
         /// <returns>返回获得的周围点集合</returns>
-        private List<Point> GetSurroundPoints(Point point, Point[,] map, int mapWidth, int mapHeight)
+        private List<AStarPoint> GetSurroundPoints(AStarPoint point, AStarPoint[,] map, int mapWidth, int mapHeight)
         {
             // 一个点一般会有上、下、左、右，左上、左下、右上、右下 八个点
-            Point up = null, down = null, left = null, right = null;
-            Point lu = null, ru = null, ld = null, rd = null;
+            AStarPoint up = null, down = null, left = null, right = null;
+            AStarPoint lu = null, ru = null, ld = null, rd = null;
 
             // 如果 点 Y 小于 mapHeight - 1，则表明不是最顶端，有上点
             if (point.Y < mapHeight - 1)
@@ -169,7 +169,7 @@ namespace AStar {
             }
 
             // 新建一个列表
-            List<Point> list = new List<Point>();
+            List<AStarPoint> list = new List<AStarPoint>();
             // 把点添加到列表
             // 上点不为空，且不是障碍物，则添加到返回列表中，下面同理
             if (up != null && up.IsWall == false)
@@ -219,12 +219,12 @@ namespace AStar {
         /// </summary>
         /// <param name="openList">开列表</param>
         /// <returns></returns>
-        private Point FindMinFOfPoint(List<Point> openList)
+        private AStarPoint FindMinFOfPoint(List<AStarPoint> openList)
         {
             float f = float.MaxValue;
-            Point tmp = null;
+            AStarPoint tmp = null;
 
-            foreach (Point p in openList)
+            foreach (AStarPoint p in openList)
             {
                 if (p.F < f)
                 {
@@ -243,7 +243,7 @@ namespace AStar {
         /// <param name="now">当前点</param>
         /// <param name="parent">当前点的父节点</param>
         /// <returns></returns>
-        private float CalcG(Point now, Point parent)
+        private float CalcG(AStarPoint now, AStarPoint parent)
         {
             return Vector2.Distance(new Vector2(now.X, now.Y), new Vector2(parent.X, parent.Y)) + parent.G;
         }
@@ -253,7 +253,7 @@ namespace AStar {
         /// </summary>
         /// <param name="now">当前点</param>
         /// <param name="end">结束点</param>
-        private void CalcF(Point now, Point end)
+        private void CalcF(AStarPoint now, AStarPoint end)
         {
             // F = G + H
             // H 值的计算方式不唯一，有意义就行，这里是结束点X和Y的和

@@ -7,13 +7,13 @@ public class Test_AStarWrapper : MonoBehaviour
 {
     int mapWidth;
     int mapHeight;
-    Point[,] map = null;
-    List<Point> wallList = null;
+    AStarPoint[,] map = null;
+    List<AStarPoint> wallList = null;
     int wallNum;
-    Point startPoint = null;
-    Point targetPoint = null;
-    List<Point> oldPath = null;
-    List<Point> newPath = null;
+    AStarPoint startPoint = null;
+    AStarPoint targetPoint = null;
+    List<AStarPoint> oldPath = null;
+    List<AStarPoint> newPath = null;
 
     Color normalColor = Color.white;
     Color wallColor = Color.black;
@@ -28,7 +28,7 @@ public class Test_AStarWrapper : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Init();
+        //Init();
     }
 
     // Update is called once per frame
@@ -36,16 +36,12 @@ public class Test_AStarWrapper : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-
             SelectStartPoint(Input.mousePosition);
         }
 
         if (Input.GetMouseButtonDown(1))
         {
-
             SelectTargetPoint(Input.mousePosition);
-
-
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -53,22 +49,22 @@ public class Test_AStarWrapper : MonoBehaviour
             RefreshMap();
         }
     }
-       
+
     void LateUpdate()
     {
         CameraMove();
     }
 
 
-
-    void Init() {
+    void Init()
+    {
         mapWidth = 12;
         mapHeight = 10;
-        map = new Point[mapWidth, mapHeight];
-        wallNum = (int)(mapWidth * mapHeight * 0.1f);
-        wallList = new List<Point>();
-        oldPath = new List<Point>();
-        newPath = new List<Point>();
+        map = new AStarPoint[mapWidth, mapHeight];
+        wallNum = (int) (mapWidth * mapHeight * 0.1f);
+        wallList = new List<AStarPoint>();
+        oldPath = new List<AStarPoint>();
+        newPath = new List<AStarPoint>();
         InitMap(mapWidth, mapHeight);
         SetWall();
 
@@ -82,9 +78,8 @@ public class Test_AStarWrapper : MonoBehaviour
         {
             for (int y = 0; y < mapHeight; y++)
             {
-                map[x, y] = new Point(x, y, CreateCube(x, y, normalColor));
+                map[x, y] = new AStarPoint(x, y, CreateCube(x, y, normalColor));
             }
-
         }
     }
 
@@ -101,20 +96,19 @@ public class Test_AStarWrapper : MonoBehaviour
                 ShowPath(startPoint, targetPoint);
             }
         }
-
     }
 
-    private void ShowPath(Point startPoint, Point targetPoint)
-    {      
-
+    private void ShowPath(AStarPoint startPoint, AStarPoint targetPoint)
+    {
         newPath.Clear();
-        Point temp = targetPoint.Parent;
+        AStarPoint temp = targetPoint.Parent;
         while (true)
         {
             if (temp == startPoint)
             {
                 break;
             }
+
             if (temp != null)
             {
                 newPath.Add(temp);
@@ -137,7 +131,6 @@ public class Test_AStarWrapper : MonoBehaviour
                 yield return new WaitForSeconds(0.05f);
             }
         }
-
     }
 
     private GameObject CreateCube(int x, int y, Color c)
@@ -149,19 +142,20 @@ public class Test_AStarWrapper : MonoBehaviour
 
         return go;
     }
+
     private void SetCubeColor(int x, int y, Color c)
     {
         map[x, y].gameObject.GetComponent<Renderer>().material.color = c;
     }
+
     private void SetWall()
     {
-
         int current = Random.Range(wallNum - wallNum / 2, wallNum + wallNum / 2);
 
         // 还原为正常
         if (wallList != null)
         {
-            foreach (Point wall in wallList)
+            foreach (AStarPoint wall in wallList)
             {
                 wall.IsWall = false;
                 SetCubeColor(wall.X, wall.Y, normalColor);
@@ -169,6 +163,7 @@ public class Test_AStarWrapper : MonoBehaviour
 
             wallList.Clear();
         }
+
         while (true)
         {
             if (wallList.Count >= wallNum)
@@ -176,31 +171,28 @@ public class Test_AStarWrapper : MonoBehaviour
                 break;
             }
 
-            Point p = map[Random.Range(0, mapWidth), Random.Range(0, mapHeight)];
+            AStarPoint p = map[Random.Range(0, mapWidth), Random.Range(0, mapHeight)];
             if (wallList.IndexOf(p) == -1)
             {
                 wallList.Add(p);
-
             }
         }
 
         // 设置为 wall
         if (wallList != null)
         {
-            foreach (Point wall in wallList)
+            foreach (AStarPoint wall in wallList)
             {
                 wall.IsWall = true;
                 SetCubeColor(wall.X, wall.Y, wallColor);
             }
-
-
         }
     }
 
 
     void SelectStartPoint(Vector3 mousePos)
     {
-        Point tmp = PhysicCAst(mousePos);
+        AStarPoint tmp = PhysicCAst(mousePos);
         if (tmp != null)
         {
             ClearOldStartPoint();
@@ -215,7 +207,7 @@ public class Test_AStarWrapper : MonoBehaviour
 
     private void SelectTargetPoint(Vector3 mousePos)
     {
-        Point tmp = PhysicCAst(mousePos);
+        AStarPoint tmp = PhysicCAst(mousePos);
         if (tmp != null)
         {
             ClearOldTargetPoint();
@@ -247,12 +239,15 @@ public class Test_AStarWrapper : MonoBehaviour
             {
                 SetCubeColor(startPoint.X, startPoint.Y, targetPosColor);
             }
-            else {
+            else
+            {
                 SetCubeColor(startPoint.X, startPoint.Y, normalColor);
             }
+
             startPoint = null;
         }
     }
+
     void ClearOldTargetPoint()
     {
         if (targetPoint != null)
@@ -264,8 +259,8 @@ public class Test_AStarWrapper : MonoBehaviour
             else
             {
                 SetCubeColor(targetPoint.X, targetPoint.Y, normalColor);
-
             }
+
             targetPoint = null;
         }
     }
@@ -274,57 +269,51 @@ public class Test_AStarWrapper : MonoBehaviour
     {
         oldPath = newPath;
 
-        foreach (Point pathItem in oldPath)
+        foreach (AStarPoint pathItem in oldPath)
         {
             SetCubeColor(pathItem.X, pathItem.Y, normalColor);
         }
+
         // 避免开始点或者目标点在老路径上被清掉，所以重新绘制一次开始点和目标点的颜色
-        if (startPoint != null) {
+        if (startPoint != null)
+        {
             SetCubeColor(startPoint.X, startPoint.Y, startPosColor);
         }
-        if (targetPoint != null) {
+
+        if (targetPoint != null)
+        {
             SetCubeColor(targetPoint.X, targetPoint.Y, targetPosColor);
         }
-        
     }
 
-    Point PhysicCAst(Vector3 mousePos)
+    AStarPoint PhysicCAst(Vector3 mousePos)
     {
-
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitInfo;
         if (Physics.Raycast(ray, out hitInfo, 20))
         {
             Transform tmp = hitInfo.collider.transform;
 
-            if (map[(int)tmp.position.x, (int)tmp.position.y].IsWall == false)
+            if (map[(int) tmp.position.x, (int) tmp.position.y].IsWall == false)
             {
-                return map[(int)tmp.position.x, (int)tmp.position.y];
+                return map[(int) tmp.position.x, (int) tmp.position.y];
             }
         }
 
         return null;
-
     }
-
-
-
-
-
 
 
     void CameraMove()
     {
-
         if (Vector3.Distance(cameraMain.transform.position, cameraTargetPosition) > 0.05f)
         {
-            cameraMain.transform.position = Vector3.Lerp(cameraMain.transform.position, cameraTargetPosition, Time.deltaTime * cameraMoveSmooth);
+            cameraMain.transform.position = Vector3.Lerp(cameraMain.transform.position, cameraTargetPosition,
+                Time.deltaTime * cameraMoveSmooth);
         }
         else
         {
             cameraMain.transform.position = cameraTargetPosition;
         }
     }
-
-    
 }

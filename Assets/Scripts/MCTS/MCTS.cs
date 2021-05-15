@@ -1,21 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class MCTS : MonoBehaviour
+public class MCTS
 {
     readonly Node root = null;
     readonly int N_SIMULATION_TIMES = 10000;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
     public MCTS(MCTSGameState gameState, int nSimulationTimes)
     {
@@ -31,7 +17,7 @@ public class MCTS : MonoBehaviour
     {
         generateGameTree();
         Node selectedChild = root.selectChildWithMaxUCB();
-        return selectedChild.gameState.lastMove;
+        return selectedChild.gameState.returnLastMove();
     }
 
     /// <summary>
