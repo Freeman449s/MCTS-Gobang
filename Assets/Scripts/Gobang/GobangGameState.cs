@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Gobang
 {
@@ -14,23 +13,23 @@ namespace Gobang
         Computer
     };
 
-    public class GobangGameState : MonoBehaviour, MCTSGameState
+    public class GobangGameState : MCTSGameState
     {
         private readonly int boardWidth;
         private readonly int boardHeight;
-        private PieceType[,] gameState; // 棋盘，使用C#二维数组
+        internal GobangPoint[,] boardState; // 棋盘，使用C#二维数组
         private readonly GobangMove lastMove = null;
 
         /// <summary>
         /// 从已有的游戏状态构建对象
         /// </summary>
-        /// <param name="gameState">已有游戏状态</param>
+        /// <param name="boardState">已有游戏状态</param>
         /// <param name="lastMove">最后一步何者落子</param>
-        public GobangGameState(PieceType[,] gameState, GobangMove lastMove)
+        public GobangGameState(GobangPoint[,] boardState, GobangMove lastMove)
         {
-            this.gameState = gameState;
-            boardWidth = gameState.GetLength(0);
-            boardHeight = gameState.GetLength(1);
+            this.boardState = boardState;
+            boardWidth = boardState.GetLength(0);
+            boardHeight = boardState.GetLength(1);
             this.lastMove = lastMove;
         }
 
@@ -43,7 +42,15 @@ namespace Gobang
         {
             this.boardWidth = boardWidth;
             this.boardHeight = boardHeight;
-            gameState = new PieceType[boardWidth, boardHeight];
+            boardState = new GobangPoint[boardWidth, boardHeight];
+            for (int x = 0; x < boardWidth; x++)
+            {
+                for (int y = 0; y < boardHeight; y++)
+                {
+                    boardState[x, y] = new GobangPoint();
+                }
+            }
+
             lastMove = null;
         }
 
@@ -70,6 +77,17 @@ namespace Gobang
         public GameResult judgeLastMove()
         {
             throw new NotImplementedException();
+        }
+
+        // ========================================== 工具函数或读取器 ==========================================
+        public PieceType getPieceType(int x, int y)
+        {
+            return boardState[x, y].pieceType;
+        }
+
+        public PieceType getPieceType(int[] coord)
+        {
+            return getPieceType(coord[0], coord[1]);
         }
     }
 }
