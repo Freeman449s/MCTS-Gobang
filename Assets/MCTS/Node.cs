@@ -100,6 +100,11 @@ public class Node
         return type;
     }
 
+    public bool isLeaf()
+    {
+        return children.Count == 0;
+    }
+
     // ============================== 闲置函数 ==============================
     /// <summary>
     /// 从当前游戏状态出发，向前模拟一步，并将带有新状态的节点作为当前节点的子节点
