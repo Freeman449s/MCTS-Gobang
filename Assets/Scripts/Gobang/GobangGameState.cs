@@ -87,15 +87,16 @@ namespace Gobang
             {
                 curPieceType = (curPieceType == PieceType.Computer ? PieceType.Player : PieceType.Computer);
                 GobangPoint point = randomlySelectPoint(localGameState.unplacedPoints);
+                if (point == null) return false;
                 point.pieceType = curPieceType;
                 GobangMove move = new GobangMove(point);
                 localGameState.placePiece(move);
-                gameResult = localGameState.judgeLastMove();
+                gameResult = localGameState.judgeLastMove(); // TODO: check unplacedPoints
             } while (gameResult == GameResult.NoOutcome);
 
             return gameResult == GameResult.ComputerWon;
         }
-        
+
         /// <summary>
         /// 落子时调用的函数
         /// 改变落子位置的PieceType，将落子点从未落子点集中移除，并更新lastMove
@@ -226,11 +227,11 @@ namespace Gobang
             {
                 for (int startY = startYMin; startY <= startYMax; startY++)
                 {
-                    if (boardState[lastPieceY, startY].pieceType == lastPieceType &&
-                        boardState[lastPieceY, startY + 1].pieceType == lastPieceType &&
-                        boardState[lastPieceY, startY + 2].pieceType == lastPieceType &&
-                        boardState[lastPieceY, startY + 3].pieceType == lastPieceType &&
-                        boardState[lastPieceY, startY + 4].pieceType == lastPieceType
+                    if (boardState[lastPieceX, startY].pieceType == lastPieceType &&
+                        boardState[lastPieceX, startY + 1].pieceType == lastPieceType &&
+                        boardState[lastPieceX, startY + 2].pieceType == lastPieceType &&
+                        boardState[lastPieceX, startY + 3].pieceType == lastPieceType &&
+                        boardState[lastPieceX, startY + 4].pieceType == lastPieceType
                     )
                     {
                         wins = true;
@@ -292,7 +293,7 @@ namespace Gobang
             if (wins) return lastPieceType == PieceType.Computer ? GameResult.ComputerWon : GameResult.PlayerWon;
             else
             {
-                HashSet<GobangPoint> unplacedPoints = findUnplacedPoints(boardState);
+                HashSet<GobangPoint> unplacedPoints = findUnplacedPoints(boardState); // TODO: check unplacedPoints
                 if (unplacedPoints.Count == 0) return GameResult.Draw;
                 else return GameResult.NoOutcome;
             }
@@ -302,9 +303,10 @@ namespace Gobang
         /// 从传入点集中随机选择一个点
         /// </summary>
         /// <param name="points">选择范围（点集）</param>
-        /// <returns>代表被选中点的对象</returns>
+        /// <returns>代表被选中点的对象。如果点集为空，将返回null</returns>
         static GobangPoint randomlySelectPoint(ISet<GobangPoint> points)
         {
+            if (points.Count == 0) return null;
             List<GobangPoint> pointList = new List<GobangPoint>(points);
             Random random = new Random();
             int index = random.Next(pointList.Count);

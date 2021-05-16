@@ -5,9 +5,9 @@ using System.Collections.Generic;
 /// </summary>
 public enum GameResult
 {
+    NoOutcome = 0,
     PlayerWon,
     ComputerWon,
-    NoOutcome,
     Draw
 };
 

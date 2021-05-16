@@ -1,7 +1,7 @@
 public class MCTS
 {
     readonly Node root = null;
-    readonly int N_SIMULATION_TIMES = 10000;
+    readonly int N_SIMULATION_TIMES = 10000; // 博弈树的节点数
 
     public MCTS(MCTSGameState gameState, int nSimulationTimes)
     {
@@ -13,7 +13,7 @@ public class MCTS
     /// 产生下一步的走法
     /// </summary>
     /// <returns>下一步的走法</returns>
-    public MCTSGameMove makeMove()
+    public MCTSGameMove decideMove()
     {
         generateGameTree();
         Node selectedChild = root.selectChildWithMaxUCB();

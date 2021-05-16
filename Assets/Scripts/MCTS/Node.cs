@@ -17,15 +17,15 @@ public class Node
     int nSimulationTimes = 0;
     int nWinTimes = 0;
     float UCB = 0;
-    readonly LevelType type; // readonly字段只能在声明时或构造函数内赋值，但对对象而言，仍然能够调用它本身提供的方法
+    readonly LevelType levelType; // readonly字段只能在声明时或构造函数内赋值，但如果是对象，仍然能够调用它本身提供的方法
     internal readonly MCTSGameState gameState = null; // 当前节点对应的游戏状态
 
     internal readonly Node parent = null;
     readonly List<Node> children = new List<Node>();
 
-    public Node(LevelType type, MCTSGameState gameState, Node parent)
+    public Node(LevelType levelType, MCTSGameState gameState, Node parent)
     {
-        this.type = type;
+        this.levelType = levelType;
         this.parent = parent;
         this.gameState = gameState;
     }
@@ -39,7 +39,7 @@ public class Node
         nSimulationTimes++;
         if (won)
         {
-            if (type == LevelType.Player) nWinTimes++;
+            if (levelType == LevelType.Player) nWinTimes++;
             else nWinTimes--;
         }
 
@@ -99,7 +99,7 @@ public class Node
 
     public LevelType getLevelType()
     {
-        return type;
+        return levelType;
     }
 
     public bool isLeaf()
@@ -115,7 +115,7 @@ public class Node
     {
         if (!existsUnexpandedChild()) return;
         MCTSGameState stateOfChild = gameState.expand(getChildrenGameStates());
-        LevelType typeOfChild = type == LevelType.Computer ? LevelType.Player : LevelType.Computer;
+        LevelType typeOfChild = levelType == LevelType.Computer ? LevelType.Player : LevelType.Computer;
         Node child = new Node(typeOfChild, stateOfChild, this);
         children.Add(child);
     }

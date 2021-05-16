@@ -3,24 +3,35 @@ using System.Collections;
 using System.Collections.Generic;
 using Gobang;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    // 核心逻辑
     [SerializeField] private int boardSideLength = 15;
+    [SerializeField] private int N_SIMULATION_TIMES = 10000; // 博弈树的节点数
     private bool playersTurn = true; // 当前是否是玩家回合
     private GobangGameState gameState = null; // 当前游戏状态
+    private bool gameRunning = true; // 游戏是否仍在运行
 
+    // 颜色常量
     [SerializeField] private Color unplacedColor = new Color(219 / 255f, 174 / 255f, 106 / 255f);
     [SerializeField] private Color playerColor = Color.black;
     [SerializeField] private Color computerColor = Color.white;
 
+    // 相机
     private Camera mainCamera; // 主相机
     private Vector3 cameraTargetPosition; // 主相机目标位置
     float cameraMoveSmooth = 3; // 控制主相机移动平滑程度
 
+    // UI
+    [SerializeField] private GameObject reminder;
+
     // Start is called before the first frame update
     void Start()
     {
+        if (reminder == null) reminder = GameObject.Find("Reminder");
+        hideReminder();
         if (boardSideLength >= 5)
         {
             gameState = new GobangGameState(boardSideLength);
@@ -32,24 +43,33 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Game initiation failed. Game board must be larger than 5x5.");
+            gameRunning = false;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (gameRunning)
         {
             if (playersTurn)
             {
-                Vector3 mousePos = Input.mousePosition;
-                playerPlacePiece(mousePos);
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Vector3 mousePos = Input.mousePosition;
+                    playerPlacePiece(mousePos);
+                    if (gameRunning) showReminder("等待电脑···");
+                }
             }
-        }
-
-        if (!playersTurn)
-        {
-            computerPlacePiece();
+            else
+            {
+                long startTime = Environment.TickCount;
+                computerPlacePiece();
+                long endTime = Environment.TickCount;
+                double deltaTime = endTime - startTime;
+                deltaTime = Math.Round(deltaTime / 1000, 2);
+                Debug.Log("电脑落子。耗时约" + deltaTime + "秒。");
+            }
         }
     }
 
@@ -73,7 +93,15 @@ public class GameManager : MonoBehaviour
         GobangMove move = new GobangMove(point);
         gameState.placePiece(move);
         paintCube(cubeCoord, playerColor);
-        // TODO: 检查是否胜利
+        GameResult result = gameState.judgeLastMove();
+        if (result != GameResult.NoOutcome)
+        {
+            gameRunning = false;
+            reminder.GetComponent<CanvasGroup>().alpha = 1;
+            if (result == GameResult.PlayerWon) showReminder("你赢了！");
+            else if (result == GameResult.Draw) showReminder("平局");
+        }
+
         playersTurn = false;
     }
 
@@ -82,16 +110,28 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void computerPlacePiece()
     {
-        MCTS mcts = new MCTS(gameState, 10000);
+        MCTS mcts = new MCTS(gameState, N_SIMULATION_TIMES);
         GobangMove nextMove;
-        MCTSGameMove MCTSMove = mcts.makeMove();
+        MCTSGameMove MCTSMove = mcts.decideMove();
         if (MCTSMove is GobangMove)
         {
             nextMove = (GobangMove) MCTSMove;
             GobangPoint point = nextMove.point;
-            gameState.boardState[point.coord[0], point.coord[1]].pieceType = PieceType.Computer;
+            if (gameState.boardState[point.coord[0], point.coord[1]].pieceType != PieceType.Unplaced)
+                Debug.LogWarning("Selected a point already had a piece.");
+            point.pieceType = PieceType.Computer;
+            gameState.placePiece(new GobangMove(point));
             paintCube(point.coord, computerColor);
-            // TODO: 检查是否胜利
+            GameResult result = gameState.judgeLastMove();
+            if (result != GameResult.NoOutcome)
+            {
+                gameRunning = false;
+                reminder.GetComponent<CanvasGroup>().alpha = 1;
+                if (result == GameResult.ComputerWon) showReminder("胜败乃兵家常事\n大侠请重新来过");
+                else if (result == GameResult.Draw) showReminder("平局");
+            }
+
+            if (gameRunning) hideReminder();
             playersTurn = true;
         }
         else
@@ -160,5 +200,17 @@ public class GameManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    // ======================================== 工具函数 ========================================
+    void showReminder(String text = null)
+    {
+        reminder.GetComponent<CanvasGroup>().alpha = 1;
+        if (text != null) reminder.GetComponent<Text>().text = text;
+    }
+
+    void hideReminder()
+    {
+        reminder.GetComponent<CanvasGroup>().alpha = 0;
     }
 }
