@@ -43,7 +43,11 @@ public class Node
             else nWinTimes--;
         }
 
-        UCB = nWinTimes * 1.0f / nSimulationTimes + Mathf.Sqrt(Mathf.Log(parent.nSimulationTimes) / nSimulationTimes);
+        if (parent != null) // 根节点无需记录UCB
+        {
+            UCB = nWinTimes * 1.0f / nSimulationTimes +
+                  Mathf.Sqrt(Mathf.Log(parent.nSimulationTimes) / nSimulationTimes);
+        }
     }
 
     /// <summary>

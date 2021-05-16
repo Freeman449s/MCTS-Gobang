@@ -6,14 +6,13 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private int boardWidth = 15;
-    [SerializeField] private int boardHeight = 15;
+    [SerializeField] private int boardSideLength = 15;
     private bool playersTurn = true; // 当前是否是玩家回合
     private GobangGameState gameState = null; // 当前游戏状态
 
-    [SerializeField] private Color unplacedColor = Color.white;
-    [SerializeField] private Color playerColor = Color.green;
-    [SerializeField] private Color computerColor = Color.red;
+    [SerializeField] private Color unplacedColor = new Color(219 / 255f, 174 / 255f, 106 / 255f);
+    [SerializeField] private Color playerColor = Color.black;
+    [SerializeField] private Color computerColor = Color.white;
 
     private Camera mainCamera; // 主相机
     private Vector3 cameraTargetPosition; // 主相机目标位置
@@ -22,11 +21,18 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        gameState = new GobangGameState(boardWidth, boardHeight);
-        mainCamera = Camera.main;
-        initGameBoard();
-        cameraTargetPosition = new Vector3((boardWidth - 1) / 2f, (boardHeight - 1) / 2f,
-            Mathf.Max(boardHeight, boardWidth) / 2f * Mathf.Sqrt(3) * -1.1f);
+        if (boardSideLength >= 5)
+        {
+            gameState = new GobangGameState(boardSideLength);
+            mainCamera = Camera.main;
+            initGameBoard();
+            cameraTargetPosition = new Vector3((boardSideLength - 1) / 2f, (boardSideLength - 1) / 2f,
+                boardSideLength / 2f * Mathf.Sqrt(3) * -1.1f);
+        }
+        else
+        {
+            Debug.LogWarning("Game initiation failed. Game board must be larger than 5x5.");
+        }
     }
 
     // Update is called once per frame
@@ -43,6 +49,7 @@ public class GameManager : MonoBehaviour
 
         if (!playersTurn)
         {
+            computerPlacePiece();
         }
     }
 
@@ -61,8 +68,12 @@ public class GameManager : MonoBehaviour
         int[] cubeCoord = physicsCast(mousePos);
         if (cubeCoord == null) return;
         if (gameState.getPieceType(cubeCoord) != PieceType.Unplaced) return;
-        gameState.boardState[cubeCoord[0], cubeCoord[1]].pieceType = PieceType.Player;
+        GobangPoint point = gameState.boardState[cubeCoord[0], cubeCoord[1]];
+        point.pieceType = PieceType.Player;
+        GobangMove move = new GobangMove(point);
+        gameState.placePiece(move);
         paintCube(cubeCoord, playerColor);
+        // TODO: 检查是否胜利
         playersTurn = false;
     }
 
@@ -74,15 +85,27 @@ public class GameManager : MonoBehaviour
         MCTS mcts = new MCTS(gameState, 10000);
         GobangMove nextMove;
         MCTSGameMove MCTSMove = mcts.makeMove();
-        if (MCTSMove is GobangMove) nextMove = (GobangMove) MCTSMove;
+        if (MCTSMove is GobangMove)
+        {
+            nextMove = (GobangMove) MCTSMove;
+            GobangPoint point = nextMove.point;
+            gameState.boardState[point.coord[0], point.coord[1]].pieceType = PieceType.Computer;
+            paintCube(point.coord, computerColor);
+            // TODO: 检查是否胜利
+            playersTurn = true;
+        }
+        else
+        {
+            Debug.LogError("Cannot convert variable nextMove to type GobangMove.");
+        }
     }
 
     // ========================================== 场景功能与工具函数 ==========================================
     void initGameBoard()
     {
-        for (int x = 0; x < boardWidth; x++)
+        for (int x = 0; x < boardSideLength; x++)
         {
-            for (int y = 0; y < boardHeight; y++)
+            for (int y = 0; y < boardSideLength; y++)
             {
                 gameState.boardState[x, y].gameObj = createCube(x, y, unplacedColor);
             }

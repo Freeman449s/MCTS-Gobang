@@ -1,14 +1,19 @@
-﻿namespace Gobang
-{
-    public class GobangMove : MCTSGameMove
-    {
-        internal int[,] gameBoardCoord; // 棋盘坐标
-        internal PieceType pieceType; // 何者落子
+﻿using System;
 
-        public GobangMove(int[,] gameBoardCoord, PieceType pieceType)
+namespace Gobang
+{
+    public class GobangMove : MCTSGameMove, ICloneable
+    {
+        internal readonly GobangPoint point;
+
+        public GobangMove(GobangPoint point)
         {
-            this.gameBoardCoord = gameBoardCoord;
-            this.pieceType = pieceType;
+            this.point = point;
+        }
+
+        public object Clone()
+        {
+            return new GobangMove((GobangPoint) point.Clone());
         }
     }
 }

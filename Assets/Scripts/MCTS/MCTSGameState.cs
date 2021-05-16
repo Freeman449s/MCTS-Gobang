@@ -7,7 +7,8 @@ public enum GameResult
 {
     PlayerWon,
     ComputerWon,
-    Undefined
+    NoOutcome,
+    Draw
 };
 
 public interface MCTSGameState
@@ -15,9 +16,9 @@ public interface MCTSGameState
     /// <summary>
     /// 检查当前游戏状态是否存在尚未展开的子状态
     /// </summary>
-    /// <param name="children">已展开的子状态</param>
+    /// <param name="existingChildren">已展开的子状态</param>
     /// <returns>存在尚未展开的子状态时返回true</returns>
-    bool existsUnexpandedChild(List<MCTSGameState> children);
+    bool existsUnexpandedChild(List<MCTSGameState> existingChildren);
 
     /// <summary>
     /// 随机地将游戏推进一步
