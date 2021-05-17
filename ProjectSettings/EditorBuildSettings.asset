@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/GobangSample.unity
+    guid: 2d8c11a90e04552429ecc2c2cabf5668
   m_configObjects: {}
